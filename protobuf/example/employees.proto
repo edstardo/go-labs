@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "/employees";
+
+package main;
+
+message Employee {
+    int32 id =  1;
+    string firstname = 2;
+    string lastname = 3;
+    int32 age = 4;
+    string address = 5;
+}
+
+message Employees {
+    repeated Employee employees = 1;
+}
