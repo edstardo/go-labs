@@ -92,7 +92,7 @@ func main() {
 	fmt.Println("Data flow apllication example")
 
 	interrupt := make(chan os.Signal)
-    signal.Notify(interrupt, os.Interrupt)
+	signal.Notify(interrupt, os.Interrupt)
 
 	quit := make(chan interface{})
 	done := make(chan string, 3)
@@ -137,7 +137,13 @@ func main() {
 	}()
 
 	go func() {
-		quit <- <-interrupt
+		for {
+			select {
+			case quit <- <-interrupt:
+				fmt.Println("\nprogram interrupted")
+			}
+		}
+
 	}()
 
 	c1.Run()
