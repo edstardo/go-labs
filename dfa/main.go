@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
 	"time"
 )
 
@@ -89,6 +91,9 @@ func (c *PrinterComponent) Perform(data *Data) {
 func main() {
 	fmt.Println("Data flow apllication example")
 
+	interrupt := make(chan os.Signal)
+    signal.Notify(interrupt, os.Interrupt)
+
 	quit := make(chan interface{})
 	done := make(chan string, 3)
 
@@ -119,10 +124,6 @@ func main() {
 	c1.To = &c2.Component
 	c2.To = &c3.Component
 
-	c1.Run()
-	c2.Run()
-	c3.Run()
-
 	go func() {
 		done <- <-c1.Done
 	}()
@@ -134,6 +135,16 @@ func main() {
 	go func() {
 		done <- <-c3.Done
 	}()
+
+	go func() {
+		quit <- <-interrupt
+	}()
+
+	c1.Run()
+	c2.Run()
+	c3.Run()
+
+	fmt.Println("DFA setup complete")
 
 	go func() {
 		<-time.After(5 * time.Second)
@@ -148,6 +159,8 @@ func main() {
 	for i := 0; i < 3; i++ {
 		fmt.Printf("component[%s] done\n", <-done)
 	}
+
+	fmt.Println("DFA terminated successfully")
 
 	close(done)
 }
